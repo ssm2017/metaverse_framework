@@ -1,0 +1,5 @@
+name = Metaverse Framework test
+description = Metaverse Framework test and demo
+dependencies[] = metaverse_framework
+package = Metaverse
+core = 7.x

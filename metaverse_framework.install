@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function metaverse_framework_uninstall() {
+  db_query("DELETE FROM {variable} WHERE name LIKE 'metaverse_framework%%'");
+}
+
+

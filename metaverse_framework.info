@@ -1,0 +1,4 @@
+name = Metaverse Framework
+description = MetaVerse Framework to allow the communication between SecondLife or OpenSimulator inworld scripts and Drupal.
+package = Metaverse
+core = 7.x

@@ -1,0 +1,44 @@
+<?php
+/**
+ * Implementation of hook_help().
+ */
+function metaverse_framework_test_help($section) {
+  switch ($section) {
+    case 'admin/help#metaverse_framework_test':
+      return '<p>'. t('Metaverse Framework test') .'</p>';
+  }
+}
+
+function metaverse_framework_test_dispatch($params) {
+  $cmd = $params[0];
+  $sl = &$params[1];
+  $args = $params[2];
+
+  switch($cmd) {
+    case 'hello':
+      $sl->response['message'] = "success;Hi there, $sl->ownername";
+      $sl->response['status'] = TRUE;
+      break;
+
+    case 'datetime':
+      $date = format_date(time(), 'custom', 'Y-m-d G:i:s');
+      $sl->response['message'] = "success;Server date/time: $date";
+      $sl->response['status'] = TRUE;
+      break;
+
+    case 'dump':
+      $output = array();
+      foreach($args as $k => $v) {
+        array_push($output,"$k -> $v");
+      }
+
+      $sl->response['message'] = "success;ARGS: ".implode(" : ",$output);
+      $sl->response['status'] = TRUE;
+      break;
+
+    default:
+      $sl->response['status'] = FALSE;
+      $sl->response['message'] = "Oops! Unknown command: $cmd.";
+      break;
+  }
+}
