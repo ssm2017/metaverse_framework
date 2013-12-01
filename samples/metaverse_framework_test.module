@@ -10,9 +10,9 @@ function metaverse_framework_test_help($section) {
 }
 
 function metaverse_framework_test_dispatch($params) {
-  $cmd = $params[0];
-  $sl = &$params[1];
-  $args = $params[2];
+  $cmd = $params['cmd'];
+	$sl = &$params['sl'];
+	$args = $params['args'];
 
   switch($cmd) {
     case 'hello':
