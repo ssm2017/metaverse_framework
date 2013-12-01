@@ -222,7 +222,7 @@ function metaverse_framework_get_session() {
 	$sl->cmd = $_POST[variable_get('metaverse_framework_cmd', 'cmd')];
 	$sl->arg = $_POST[variable_get('metaverse_framework_arg', 'arg')];
 	$sl->output_type = $_POST['output_type'];
-	$sl->args_separator = $_POST['args_separator'];
+	$sl->args_separator = isset($_POST['args_separator']) ? $_POST['args_separator'] : variable_get('metaverse_framework_args_separator', ':');
 
 	preg_match_all('/(.*) \((\d+), (\d+)\)/', $sl->region, $temp);
 	$sl->region_name = $temp[1][0];
