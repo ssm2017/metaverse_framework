@@ -359,3 +359,30 @@ function metaverse_framework_rpc($channel, $intVal, $stringVal, $host = 'xmlrpc.
 	// return the response data in an array
 	return array('channel' => $channel, 'string' => $sVal, 'integer' => $iVal);
 }
+
+function metaverse_framework_http_request($url, $settings = array()) {
+	$response = new stdclass();
+	$response->data = '';
+	if (!function_exists('curl_init')) {
+		$response->success = FALSE;
+		$response->code = -1;
+		$response->message = 'Curl is not installed';
+	}
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+	$data = curl_exec($ch);
+	if (!$data) {
+		$response->success = FALSE;
+		$response->code = curl_errno($ch);
+		$response->message = curl_error($ch);
+	}
+	$response->success = TRUE;
+	$response->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	$response->message = '';
+	$response->data = $data;
+	curl_close($ch);
+	return $response;
+}
