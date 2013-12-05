@@ -1,11 +1,10 @@
 <?php
 
-
 /**
  * UUID zero
  */
 if (!defined('UUID_ZERO')) {
-  define('UUID_ZERO', '00000000-0000-0000-0000-000000000000');
+	define('UUID_ZERO', '00000000-0000-0000-0000-000000000000');
 }
 
 define('SECONDLIFE_LINDEN_SERVERS', '8.2.32.0/22
@@ -189,7 +188,7 @@ function metaverse_framework_request() {
 		// parse args
 		$args = metaverse_framework_parse_args($sl->arg, $args_separator);
 		// check for a password
-		$password = variable_get($sl->app.'_password', FALSE);
+		$password = variable_get($sl->app . '_password', FALSE);
 		if ($password) {
 			$password_valid = FALSE;
 			if (isset($args['password']) && isset($args['keypass'])) {
@@ -207,7 +206,6 @@ function metaverse_framework_request() {
 				metaverse_framework_send_response($sl);
 				return;
 			}
-
 		}
 		// workaround adding reference to an array to be able to pass reference to module_invoke (for php > 5.2)
 		$params = array('cmd' => $sl->cmd, 'sl' => &$sl, 'args' => $args);
@@ -309,9 +307,10 @@ function metaverse_framework_send_response(&$sl) {
 	}
 }
 
-/*******************
- *		HELPERS
- *******************/
+/* * *****************
+ * 		HELPERS
+ * ***************** */
+
 /**
  * Write the debug infos to the debug file.
  */
@@ -446,12 +445,12 @@ function metaverse_framework_check_uuid($uuid) {
  * @return String The uuid
  */
 function metaverse_framework_uuid_create() {
-  return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+	return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 }
 
 function metaverse_framework_password_is_valid($values) {
-  if ($values['password_given'] == md5($values['module_password'].':'.$values['key_given'])) {
-    return TRUE;
-  }
-  return FALSE;
+	if ($values['password_given'] == md5($values['module_password'] . ':' . $values['key_given'])) {
+		return TRUE;
+	}
+	return FALSE;
 }
