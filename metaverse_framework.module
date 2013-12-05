@@ -186,9 +186,32 @@ function metaverse_framework_request() {
 
 	$dispatcher = $sl->app . '_dispatch';
 	if ($sl->app && $sl->cmd && function_exists($dispatcher)) {
+		// parse args
 		$args = metaverse_framework_parse_args($sl->arg, $args_separator);
+		// check for a password
+		$password = variable_get($sl->app.'_password', FALSE);
+		if ($password) {
+			$password_valid = FALSE;
+			if (isset($args['password']) && isset($args['keypass'])) {
+				$values = array(
+					'password_given' => $args['password'],
+					'key_given' => $args['keypass'],
+					'module_password' => $password
+				);
+				$password_valid = metaverse_framework_password_is_valid($values);
+			}
+			if (!$password_valid) {
+				$sl->response['status'] = FALSE;
+				$sl->response['message'] = "wrong password";
+				metaverse_framework_debug(" WRONG PASSWORD ");
+				metaverse_framework_send_response($sl);
+				return;
+			}
+
+		}
 		// workaround adding reference to an array to be able to pass reference to module_invoke (for php > 5.2)
 		$params = array('cmd' => $sl->cmd, 'sl' => &$sl, 'args' => $args);
+		// send the call to the destination module
 		module_invoke($sl->app, 'dispatch', $params);
 	}
 	else {
@@ -424,4 +447,11 @@ function metaverse_framework_check_uuid($uuid) {
  */
 function metaverse_framework_uuid_create() {
   return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+}
+
+function metaverse_framework_password_is_valid($values) {
+  if ($values['password_given'] == md5($values['module_password'].':'.$values['key_given'])) {
+    return TRUE;
+  }
+  return FALSE;
 }
