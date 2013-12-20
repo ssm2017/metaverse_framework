@@ -72,7 +72,7 @@ function metaverse_framework_settings() {
 		'#type' => 'textarea',
 		'#title' => t('Allowed Ips'),
 		'#default_value' => variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS),
-		'#description' => t('Enter the allowed Ips separated by a comma.'),
+		'#description' => t('Enter the allowed Ips one by a line and the subnet mask like 0.0.0.0/32.'),
 	);
 	$form['metaverse_framework_use_proxy'] = array(
 		'#type' => 'radios',
@@ -135,43 +135,20 @@ function metaverse_framework_settings() {
  * Main function.
  */
 function metaverse_framework_request() {
-	// check for server ips
-	$is_valid = FALSE;
-	$ll_subnets = explode("\n", variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS));
-	$remote_addr = $_SERVER['REMOTE_ADDR'];
-	if (variable_get('metaverse_framework_use_proxy', 0)) {
-		// TODO : need review
-		//$tempa = split(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
-		//$remote_addr = trim($tempa[1]);
-		if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			$remote_addr = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		}
-		elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
-			$remote_addr = $_SERVER['HTTP_X_REAL_IP'];
-		}
-	}
-	foreach ($ll_subnets as $network) {
-		if (metaverse_framework_netmatch($network, $remote_addr)) {
-			$is_valid = TRUE;
-			break;
-		}
-	}
-	if (!$is_valid) {
-		metaverse_framework_debug("*********************************************************");
-		metaverse_framework_debug(" WRONG IP ");
-		metaverse_framework_debug($_SERVER['REMOTE_ADDR']);
-		metaverse_framework_debug("*********************************************************");
-		metaverse_framework_get_session();
-		return;
-	}
 
-	// Get a timer to compute the answer timing.
+  // Get a timer to compute the answer timing.
 	$timer_enabled = variable_get('metaverse_framework_timer', 0);
 
 	if ($timer_enabled) {
 		timer_start('metaverse_framework_request');
 	}
 
+	// check for server ips
+	if (!metaverse_framework_check_ip()) {
+    return;
+  }
+
+  // get session values
 	$sl = metaverse_framework_get_session();
 
 	// get the arguments separator
@@ -453,4 +430,45 @@ function metaverse_framework_password_is_valid($values) {
 		return TRUE;
 	}
 	return FALSE;
+}
+
+function metaverse_framework_check_ip() {
+  $is_valid = FALSE;
+
+  // check if the app has an allowed ips field
+  $app = $_POST[variable_get('metaverse_framework_app', 'app')];
+  $subnets = variable_get($app. '_allowed_ips', FALSE);
+  if (!$subnets) {
+    $subnets = explode("\n", variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS));
+  }
+
+  // check for server ips
+	$remote_addr = $_SERVER['REMOTE_ADDR'];
+	if (variable_get('metaverse_framework_use_proxy', 0)) {
+		// TODO : need review
+		//$tempa = split(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+		//$remote_addr = trim($tempa[1]);
+		if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$remote_addr = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
+		elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
+			$remote_addr = $_SERVER['HTTP_X_REAL_IP'];
+		}
+	}
+	foreach ($subnets as $network) {
+		if (metaverse_framework_netmatch($network, $remote_addr)) {
+			$is_valid = TRUE;
+			break;
+		}
+	}
+
+	if (!$is_valid) {
+		metaverse_framework_debug("*********************************************************");
+		metaverse_framework_debug(" WRONG IP ");
+		metaverse_framework_debug($_SERVER['REMOTE_ADDR']);
+		metaverse_framework_debug("*********************************************************");
+		metaverse_framework_get_session();
+		return FALSE;
+	}
+  return TRUE;
 }
