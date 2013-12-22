@@ -68,26 +68,44 @@ function metaverse_framework_settings() {
 		0 => t('User page'),
 		1 => t('Referrals page'),
 	);
-	$form['metaverse_framework_allowed_ips'] = array(
+  $form['network'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Network'),
+    '#collapsable' => TRUE,
+    '#collapsed' => FALSE
+  );
+  $form['network']['metaverse_framework_allow_all_ip'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Allow all Ips'),
+		'#default_value' => variable_get('metaverse_framework_allow_all_ip', 0),
+		'#description' => t('Select if you want to disable ip verification for this module.'),
+	);
+	$form['network']['metaverse_framework_allowed_ips'] = array(
 		'#type' => 'textarea',
 		'#title' => t('Allowed Ips'),
 		'#default_value' => variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS),
 		'#description' => t('Enter the allowed Ips one by a line and the subnet mask like 0.0.0.0/32.'),
 	);
-	$form['metaverse_framework_use_proxy'] = array(
+	$form['network']['metaverse_framework_use_proxy'] = array(
 		'#type' => 'radios',
 		'#title' => t('Use proxy'),
 		'#default_value' => variable_get('metaverse_framework_use_proxy', 0),
 		'#options' => array(0 => t('No'), 1 => t('Yes')),
 		'#description' => t('Select "yes" if your website is behind a proxy.'),
 	);
-	$form['metaverse_framework_debug'] = array(
+  $form['debug'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Debug'),
+    '#collapsable' => TRUE,
+    '#collapsed' => FALSE
+  );
+	$form['debug']['metaverse_framework_debug'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Debugging enabled ?'),
 		'#default_value' => variable_get('metaverse_framework_debug', ''),
 		'#description' => t('Enable debugging output of server/client interactions. Enter the full path name of the file to write the debugging output to, such as /tmp/metaverse_framework.debug. It must be writable to the user who runs your web server. Leave blank for no debugging'),
 	);
-	$form['metaverse_framework_timer'] = array(
+	$form['debug']['metaverse_framework_timer'] = array(
 		'#type' => 'radios',
 		'#title' => t('Enable timing of requests ?'),
 		'#default_value' => variable_get('metaverse_framework_timer', 0),
@@ -439,7 +457,17 @@ function metaverse_framework_check_ip() {
   $app = $_POST[variable_get('metaverse_framework_app', 'app')];
   $subnets = variable_get($app. '_allowed_ips', FALSE);
   if (!$subnets) {
-    $subnets = explode("\n", variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS));
+    $subnets = variable_get('metaverse_framework_allowed_ips', SECONDLIFE_LINDEN_SERVERS);
+  }
+  $subnets = explode("\n", $subnets);
+
+  // check if ip check is disabled
+  $disabled = variable_get($app. '_allow_all_ip', 0);
+  if (!$disabled) {
+    $disabled = explode("\n", variable_get('metaverse_framework_allow_all_ip', 0));
+  }
+  if ($disabled) {
+    return TRUE;
   }
 
   // check for server ips
