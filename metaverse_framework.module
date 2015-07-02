@@ -300,6 +300,7 @@ function metaverse_framework_send_response(&$sl) {
 			print strip_tags($sl->response['message']);
 			break;
 	}
+	drupal_exit();
 }
 
 /* * *****************
